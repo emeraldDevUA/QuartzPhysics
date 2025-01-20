@@ -44,11 +44,12 @@ public class Wing implements ActiveElement{
             return new Vector3f(0);
         }
         Vector3f drag_direction = (new Vector3f(velocity).negate()).normalize();
+        Vector3f lift_direction = new Vector3f();
 
-        Vector3f lift_direction = new Vector3f();  // to store the final result
-        drag_direction.cross(normal, lift_direction)  // first cross product
-                .cross(drag_direction, lift_direction)  // second cross product
-                .normalize();  // normalize the final result
+        Vector3f nestedCrossProduct = drag_direction.cross(normal, new Vector3f());
+        Vector3f mainCrossProduct = nestedCrossProduct.cross(drag_direction);
+
+        lift_direction.set(mainCrossProduct.normalize());
 
         float angleOfAttack = (float) Math.toDegrees(Math.asin(drag_direction.dot(normal)));
 
@@ -75,9 +76,9 @@ public class Wing implements ActiveElement{
         liftForce = liftForce.mul(dynamic_pressure);
         dragForce = dragForce.mul(dynamic_pressure);
 
-        rb.applyForceAtPoint(liftForce.add(dragForce, new Vector3f()), position);
+        rb.applyForceAtPoint(liftForce.add(dragForce), position);
 
-        return liftForce.add(dragForce, new Vector3f());
+        return liftForce;
     }
 
 }

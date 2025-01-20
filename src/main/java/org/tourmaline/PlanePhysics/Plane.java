@@ -21,9 +21,7 @@ public class Plane extends RigidBody {
         applyForceAtPoint(engine.getForce(this), new Vector3f(0));
         
         for(Wing wing: wings){
-
             Vector3f wingForce = wing.getForce(this);
-
         }
 
         super.update(dt);

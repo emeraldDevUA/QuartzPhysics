@@ -7,6 +7,7 @@ import org.joml.Vector3f;
 import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
 import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
+import org.tourmaline.PlanePhysics.PID;
 import org.tourmaline.PlanePhysics.Plane;
 import org.tourmaline.PlanePhysics.Wing;
 import org.tourmaline.RigidBody.RigidBody;
@@ -46,7 +47,7 @@ public class Main {
 
         Plane plane = new Plane(inertia, new Vector3f(0,8000,0), 9000, jetEngine, wings);
 
-        float simulationTime = 50.0f; // Total simulation time in seconds
+        float simulationTime = 100.0f; // Total simulation time in seconds
         float timeStep = 0.1f; // Time step for simulation
 
         System.out.println("Starting plane simulation...");
@@ -63,7 +64,23 @@ public class Main {
         plane.setControlInput(0.0f,0,0.0f);
         plane.getVelocity().x = 160;
         plane.setEnableGravity(true);
-        for (float t = 0; t < simulationTime; t += timeStep) {
+//        float max_av = 45.0f;  // deg/s
+//        float target_av = max_av * joystick.elevator;
+//        float current_av = glm::degrees(player.airplane.angular_velocity.z);
+//        player.airplane.joystick.z = pitch_control_pid.calculate(current_av, target_av, dt);
+
+        PID pid = new PID(1.0f, 0.0f, 0.0f);
+
+        for (float t = 0; t < simulationTime; t += timeStep){
+
+            float elevator = 0;
+            float max_av = 45.0f;
+            float target_av = max_av * elevator;
+            float current_av = Math.toDegrees(plane.getAngularVelocity().z);
+
+            elevator = pid.calculate(current_av, target_av, timeStep);
+            
+            plane.setControlInput(0.0f, elevator,0.0f);
             plane.update(timeStep);
 
             // Get the necessary data
@@ -74,7 +91,7 @@ public class Main {
             String angularAccelerationStr = plane.getAcceleration().toString(); // Assuming `getAngularAcceleration()` returns a string
 
 
-            System.out.println(toDeg(plane.getOrientation()));
+            System.out.println(orientationStr);
             // Print the current values in the table format
 //            System.out.printf("| %-10.2f | %-23s | %-23s | %-23s | %-23s | %-23s |%n",
 //                    t, positionStr, velocityStr, orientationStr, angularVelocityStr, angularAccelerationStr);

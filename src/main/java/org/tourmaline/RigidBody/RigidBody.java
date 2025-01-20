@@ -54,6 +54,8 @@ public class RigidBody {
         if(enableGravity){
             acceleration.y -= 9.8f;
         }
+
+
         position.add(new Vector3f(velocity).mul(dt))
                 .add(new Vector3f(acceleration).mul(0.5f * dt * dt));
 
@@ -73,15 +75,15 @@ public class RigidBody {
             angularVelocity.normalize().mul(MAX_ANGULAR_VELOCITY);
         }
 
-//        Quaternionf deltaRotation
-//                = new Quaternionf(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0)
-//                .mul(dt / 2);
-//        orientation.add(deltaRotation);
+        Quaternionf deltaRotation
+                = new Quaternionf(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0)
+                .mul(dt / 2);
+        orientation.add(deltaRotation);
 
 
-        orientation.rotateLocalX(angularVelocity.x*dt/2);
-        orientation.rotateLocalY(angularVelocity.y*dt/2);
-        orientation.rotateLocalZ(angularVelocity.z*dt/2);
+//        orientation.rotateLocalX(angularVelocity.x*dt/2);
+//        orientation.rotateLocalY(angularVelocity.y*dt/2);
+//        orientation.rotateLocalZ(angularVelocity.z*dt/2);
 
         orientation.normalize();
 

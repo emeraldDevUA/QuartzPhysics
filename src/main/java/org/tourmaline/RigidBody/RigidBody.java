@@ -5,12 +5,15 @@ import lombok.Setter;
 import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.tourmaline.Collision.BoundingBox;
 import org.tourmaline.Collision.CollisionPrimitive;
 
-@Getter   @Setter
+@Getter
+@Setter
 public class RigidBody {
     private static final float MAX_ANGULAR_VELOCITY = 20;
     private static final float MAX_VELOCITY = 1000;
+
 
     // unused for now
     private CollisionPrimitive collisionPrimitive;
@@ -80,14 +83,10 @@ public class RigidBody {
                 .mul(dt / 2);
         orientation.add(deltaRotation);
 
-
-//        orientation.rotateLocalX(angularVelocity.x*dt/2);
-//        orientation.rotateLocalY(angularVelocity.y*dt/2);
-//        orientation.rotateLocalZ(angularVelocity.z*dt/2);
-
         orientation.normalize();
 
         // Reset forces and torques for next iteration
+
         netForce.set(0);
         netTorque.set(0);
     }

@@ -51,19 +51,23 @@ public class Main {
 
         RigidBody rb1 = new RigidBody(inertia, new Vector3f(1000), 500);
         rb1.setEnableGravity(true);
-
-
         RigidBody rb2 = new RigidBody(inertia, new Vector3f(800), 300);
         rb2.setEnableGravity(true);
 
+
         rb2.applyForce(new Vector3f(1000,0,0));
 
-        PhysicsProcessor physicsProcessor = new PhysicsProcessor(new ArrayList<>());
-        physicsProcessor.addRigidBody(rb1);     physicsProcessor.addRigidBody(rb2);
+
+        PhysicsProcessor physicsProcessor = new PhysicsProcessor(new ArrayList<>(), 0.001f);
+
+        physicsProcessor.addRigidBody(rb1);
+        physicsProcessor.addRigidBody(rb2);
 
         physicsProcessor.start();
-        physicsProcessor.join();
 
+        Thread.sleep(5000);
+
+        physicsProcessor.setRunning(false);
 
     }
 

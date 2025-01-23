@@ -14,6 +14,9 @@ public class BoundingBox extends CollisionPrimitive{
         setPosition(position);
         this.halfDims = halfDims;
         setQuaternion(quaternion);
+
+
+
     }
 
 

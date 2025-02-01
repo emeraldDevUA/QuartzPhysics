@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 import static java.lang.StringTemplate.STR;
 
 @AllArgsConstructor
@@ -19,5 +21,17 @@ public class Tuple<A, B>{
     @Override
     public String toString(){
         return STR."<\{a} \{b}>";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tuple<?, ?> tuple)) return false;
+        return Objects.equals(a, tuple.a) && Objects.equals(b, tuple.b);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, b);
     }
 }

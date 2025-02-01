@@ -11,13 +11,15 @@ import org.joml.Vector3f;
 @Getter
 @Setter
 public abstract class CollisionPrimitive {
+    protected float epsilon = 1;
 
     private Vector3f position;
     private Quaternionf quaternion;
-
     private Runnable collisionLambda;
 
+
     public CollisionPrimitive(Vector3f position){
+
         this.position = position;
     }
 

@@ -7,7 +7,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.tourmaline.Collision.CollisionPrimitive;
 
-@Getter   @Setter
+@Getter
+@Setter
 public class RigidBody {
     private static final float MAX_ANGULAR_VELOCITY = 20;
     private static final float MAX_VELOCITY = 1000;
@@ -30,6 +31,11 @@ public class RigidBody {
     private Quaternionf orientation;
 
     private boolean enableGravity = true;
+    private boolean enableAirResistance = false;
+    private boolean enableNormalReaction = false;
+    private boolean enableFriction = false;
+
+    private float frictionQuotient;
 
     public RigidBody(Matrix3f inertia, Vector3f position, float mass){
         this.mass = mass;
@@ -46,7 +52,7 @@ public class RigidBody {
 
         orientation = new Quaternionf(0,0,0,1);
 
-
+        frictionQuotient = 0.4f;
     }
 
 

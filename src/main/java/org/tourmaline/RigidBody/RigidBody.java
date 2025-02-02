@@ -219,6 +219,14 @@ public class RigidBody {
         netTorque.add(new Vector3f(point).cross(force));
     }
 
+    public void applyForceAtPoint_body(Vector3f force, Vector3f point){
+
+
+        netForce.add((force));
+        netTorque.add(new Vector3f(point).cross(force));
+    }
+
+
     protected Vector3f transformDirection(Vector3f vector){
         return orientation.transform(new Vector3f(vector));
     }

@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class PhysicsProcessor extends Thread{
-    private static final int workerCount = 8;
+
     private final List<RigidBody> rigidBodies;
     private final ExecutorService executor =
             Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());

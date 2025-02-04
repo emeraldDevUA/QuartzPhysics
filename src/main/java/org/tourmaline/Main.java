@@ -17,10 +17,10 @@ import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-    //        Matrix3f inertia = new Matrix3f(
-    //                46311.668f, -660.000f, -0.000f,
-    //                -660.000f,188713.797f,-0.000f,
-    //                -0.000f, -0.000f,147367.125f);
+            Matrix3f inertia = new Matrix3f(
+                    46311.668f, -660.000f, -0.000f,
+                    -660.000f,188713.797f,-0.000f,
+                    -0.000f, -0.000f,147367.125f);
     //
     //        Engine jetEngine = new Engine(13000);
     //        ArrayList<Wing> wings = new ArrayList<>();
@@ -46,10 +46,10 @@ public class Main {
     //        Plane plane = new Plane(inertia, new Vector3f(0,8000,0), 9000, jetEngine, wings);
     //
     //
-    //        RigidBody rb1 = new RigidBody(inertia, new Vector3f(1000), 500);
-    //        rb1.setEnableGravity(true);
-    //        RigidBody rb2 = new RigidBody(inertia, new Vector3f(800), 300);
-    //        rb2.setEnableGravity(true);
+            RigidBody rb1 = new RigidBody(inertia, new Vector3f(1000), 500);
+            rb1.setEnableGravity(true);
+            RigidBody rb2 = new RigidBody(inertia, new Vector3f(800), 300);
+            rb2.setEnableGravity(true);
     //
     //
     //        rb2.applyForce(new Vector3f(1000,0,0));
@@ -66,6 +66,13 @@ public class Main {
     //
     //        physicsProcessor.setRunning(false);
 
+        rb1.setEnableAirResistance(true);
+        rb1.setSurfaceArea(15);
+        for(int i = 0; i < 500; i ++){
+            rb1.update(0.1f*i);
+            System.err.println(rb1);
+
+        }
     }
 
     static  Vector3f toDeg(Quaternionf quat){

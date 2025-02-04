@@ -6,13 +6,18 @@ import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.tourmaline.Collision.CollisionPrimitive;
+import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
+import org.tourmaline.PlanePhysics.Tuple;
+
+import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
+import static org.tourmaline.PlanePhysics.Airfoil.Constants.NACA_2412;
 
 @Getter
 @Setter
 public class RigidBody {
     private static final float MAX_ANGULAR_VELOCITY = 20;
     private static final float MAX_VELOCITY = 1000;
-
+    private static final float EPSILON = 10E-6f;
     // unused for now
     private CollisionPrimitive collisionPrimitive;
     private float mass;
@@ -36,6 +41,11 @@ public class RigidBody {
     private boolean enableFriction = false;
 
     private float frictionQuotient;
+    private float surfaceArea;
+
+    private Vector3f surfaceNormal;
+
+    private static Airfoil staticFoil = null;
 
     public RigidBody(Matrix3f inertia, Vector3f position, float mass){
         this.mass = mass;
@@ -53,6 +63,11 @@ public class RigidBody {
         orientation = new Quaternionf(0,0,0,1);
 
         frictionQuotient = 0.4f;
+        surfaceNormal = new Vector3f(0,1,0);
+
+        if(staticFoil == null){
+            staticFoil = new Airfoil(arrayToList(NACA_2412));
+        }
     }
 
 
@@ -61,6 +76,50 @@ public class RigidBody {
 
         if(enableGravity){
             acceleration.y -= 9.8f;
+        }
+
+        if(enableAirResistance){
+            // compute air resistance
+            float po = 1.225f;
+            float squaredSpeed = velocity.lengthSquared();
+            if(!(squaredSpeed <= EPSILON)) {
+
+                Vector3f reversedVelocity = new Vector3f(velocity)
+                        .negate().normalize();
+
+                Vector3f bodyNormal = new Vector3f(0,1,0);
+
+                float angle = (float) Math.toDegrees(
+                        Math.asin(reversedVelocity.dot(bodyNormal))
+                );
+                Tuple<Float, Float> tuple = staticFoil.sample(angle);
+                // Compute air resistance force: 1/2 * p * v^2 * S * Cd * -v̂
+
+                reversedVelocity.mul(
+                        0.5f*po*squaredSpeed*surfaceArea*tuple.b
+                );
+                reversedVelocity.div(mass);
+                acceleration.add(reversedVelocity);
+                // use some airfoil to compute drag.
+
+            }
+        }
+
+        if(enableNormalReaction){
+            Vector3f normalReactionForce = computeNormalReaction();
+            normalReactionForce.div(mass);
+            if (enableFriction) {
+                float absVelocity = velocity.length();
+                if(!(absVelocity <= EPSILON)){
+                    Vector3f reversedVelocity = new Vector3f(velocity)
+                            .negate().normalize();
+                    Vector3f frictionForce =
+                            reversedVelocity.mul(frictionQuotient*normalReactionForce.length());
+                    acceleration.add(frictionForce);
+                }
+
+            }
+            acceleration.add(normalReactionForce);
         }
 
 
@@ -83,9 +142,9 @@ public class RigidBody {
             angularVelocity.normalize().mul(MAX_ANGULAR_VELOCITY);
         }
 
-        Quaternionf deltaRotation
-                = new Quaternionf(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0)
-                .mul(dt / 2);
+//        Quaternionf deltaRotation
+//                = new Quaternionf(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0)
+//                .mul(dt / 2);
 //        orientation.add(deltaRotation);
 
 
@@ -204,7 +263,12 @@ public class RigidBody {
         netForce.add(transformDirection(force));
     }
 
+    private Vector3f computeNormalReaction(){
 
+        return new Vector3f(surfaceNormal).normalize()
+                .mul(netForce.dot(surfaceNormal) /
+                                surfaceNormal.lengthSquared());
+    }
 
     public void applyTorque(Vector3f vector3f) {
         netTorque.add(vector3f);
@@ -219,12 +283,7 @@ public class RigidBody {
         netTorque.add(new Vector3f(point).cross(force));
     }
 
-    public void applyForceAtPoint_body(Vector3f force, Vector3f point){
 
-
-        netForce.add((force));
-        netTorque.add(new Vector3f(point).cross(force));
-    }
 
 
     protected Vector3f transformDirection(Vector3f vector){
@@ -244,5 +303,8 @@ public class RigidBody {
         return bodyVelocity;
     }
 
-
+    @Override
+    public String toString() {
+        return STR."RigidBody{position=\{position}, velocity=\{velocity}, acceleration=\{acceleration}, angularVelocity=\{angularVelocity}, orientation=\{orientation}\{'}'}";
+    }
 }

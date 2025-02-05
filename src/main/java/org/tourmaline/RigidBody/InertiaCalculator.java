@@ -44,13 +44,13 @@ public class InertiaCalculator {
 
             Vector3f offset = primitive.getOffset();
 
-            Ixx += (float) (primitive.getInertia().x + primitive.getMass()
+            Ixx += (float) (primitive.calculateInertia().x + primitive.getMass()
                                 * (pow(offset.y, 2) + pow(offset.z, 2)));
 
-            Iyy += (float) (primitive.getInertia().y + primitive.getMass()
+            Iyy += (float) (primitive.calculateInertia().y + primitive.getMass()
                     * (pow(offset.z, 2) + pow(offset.x, 2)));
 
-            Izz += (float) (primitive.getInertia().z + primitive.getMass()
+            Izz += (float) (primitive.calculateInertia().z + primitive.getMass()
                     * (pow(offset.x, 2) + pow(offset.y, 2)));
 
             Ixy += primitive.getMass() * (offset.x * offset.y);

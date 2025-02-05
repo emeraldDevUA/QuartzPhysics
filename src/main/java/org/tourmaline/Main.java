@@ -4,14 +4,19 @@ import org.joml.Math;
 import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.tourmaline.Collision.CollisionPrimitive;
 import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
 import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
 import org.tourmaline.Processing.PhysicsProcessor;
+import org.tourmaline.RigidBody.InertiaCalculator;
+import org.tourmaline.RigidBody.InertiaPrimitives.Cuboid;
+import org.tourmaline.RigidBody.InertiaPrimitives.InertiaPrimitive;
 import org.tourmaline.RigidBody.RigidBody;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
 
@@ -24,8 +29,8 @@ public class Main {
     //
     //        Engine jetEngine = new Engine(13000);
     //        ArrayList<Wing> wings = new ArrayList<>();
-    //        float wing_offset = -1.0f;
-    //        float tail_offset = -6.6f;
+            float wing_offset = -1.0f;
+            float tail_offset = -6.6f;
     //        Airfoil airfoil0012 = new Airfoil(arrayToList(Constants.NACA_0012));
     //
     //        Airfoil airfoil2412 = new Airfoil(arrayToList(Constants.NACA_2412));
@@ -66,12 +71,30 @@ public class Main {
     //
     //        physicsProcessor.setRunning(false);
 
+
+        float plane_mass = 10000f;
+        List<InertiaPrimitive> list = new ArrayList<>();
+
+        list.add(new Cuboid(new Vector3f(wing_offset,0, 2.7f),
+                new Vector3f(6.96f, 0.10f, 3.50f), plane_mass*1/4));
+        list.add(new Cuboid(new Vector3f(wing_offset,0, -2.7f),
+                new Vector3f(6.96f, 0.10f, 3.50f), plane_mass*1/4));
+        list.add(new Cuboid(new Vector3f(tail_offset,-0.1f, 0f),
+                new Vector3f(6.54f, 0.10f, 2.70f), plane_mass*1/10));
+        list.add(new Cuboid(new Vector3f(tail_offset, 0.0f, 0.0f),
+                new Vector3f(5.31f, 3.10f, 0.10f), plane_mass*1/10));
+        list.add(new Cuboid(new Vector3f(0f),
+                new Vector3f(8,2,2), plane_mass/2));
+
+        inertia = InertiaCalculator.getInertiaTensor(list, true);
+
+        System.err.println(inertia);
+
         rb1.setEnableAirResistance(true);
         rb1.setSurfaceArea(15);
         for(int i = 0; i < 500; i ++){
             rb1.update(0.1f*i);
             System.err.println(rb1);
-
         }
     }
 

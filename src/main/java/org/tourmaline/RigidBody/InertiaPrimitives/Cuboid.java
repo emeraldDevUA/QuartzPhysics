@@ -5,13 +5,14 @@ import org.joml.Vector3f;
 import static java.lang.Math.pow;
 
 public class Cuboid extends InertiaPrimitive {
-    public Cuboid(Vector3f size, Vector3f position, Vector3f inertia, Vector3f offset, float mass) {
-        super(size, position, inertia, offset, mass);
+
+
+    public Cuboid(Vector3f position, Vector3f size, float mass) {
+        super(position, size, mass);
     }
 
-
     @Override
-    public Vector3f getInertia() {
+    public Vector3f calculateInertia() {
 
         float x = size.x, y = size.y, z = size.z;
 

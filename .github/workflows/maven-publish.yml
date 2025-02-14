@@ -19,28 +19,25 @@ jobs:
       - name: Set up JDK 21 (Preview version)
         uses: actions/setup-java@v4
         with:
-          java-version: '21'   # Use the preview version number (adjust based on availability)
+          java-version: '21'
           distribution: 'corretto'
-          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-          settings-path: ${{ github.workspace }} # location for the settings.xml file
-          java-package: jdk
-          architecture: x64
-          # Add preview support by enabling preview features
-          options: '-J--enable-preview'
+          server-id: github
+          settings-path: ${{ github.workspace }}
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      - name: Build with Maven (Enable Preview)
+        run: mvn -B package --file pom.xml --enable-preview
 
       - name: Publish to GitHub Packages Apache Maven
         run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Mark Release as Pre-release (if needed)
         if: github.event.release.prerelease == true
         run: |
-          echo "This is a preview release. Marking as pre-release."
+          echo "Marking release as pre-release."
           curl -X PATCH \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -d '{"prerelease":true}' \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"prerelease": true}' \
             "https://api.github.com/repos/${{ github.repository }}/releases/${{ github.event.release.id }}"

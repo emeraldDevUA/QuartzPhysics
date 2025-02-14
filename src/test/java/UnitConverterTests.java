@@ -1,5 +1,3 @@
-
-
 import org.junit.jupiter.api.Test;
 import org.tourmaline.PlanePhysics.Tuple;
 import org.tourmaline.Units.Length.LengthUnits;
@@ -17,8 +15,8 @@ class SpeedUnitConverterTest {
     void testMetersPerSecondToKilometersPerHour() {
         float result = speedConverter.convert(
                 1.0f,
-                new Tuple<>(LengthUnits.METER, LengthUnits.KILOMETER),
-                new Tuple<>(TimeUnits.SECOND, TimeUnits.HOUR)
+                new Tuple<>(LengthUnits.METER, TimeUnits.SECOND), // Correct Tuple with Length and Time
+                new Tuple<>(LengthUnits.KILOMETER, TimeUnits.HOUR) // Correct Tuple with Length and Time
         );
         assertEquals(3.6f, result, DELTA);
     }
@@ -27,8 +25,8 @@ class SpeedUnitConverterTest {
     void testKilometersPerHourToMetersPerSecond() {
         float result = speedConverter.convert(
                 1.0f,
-                new Tuple<>(LengthUnits.KILOMETER, LengthUnits.METER),
-                new Tuple<>(TimeUnits.HOUR, TimeUnits.SECOND)
+                new Tuple<>(LengthUnits.KILOMETER, TimeUnits.HOUR), // Correct Tuple with Length and Time
+                new Tuple<>(LengthUnits.METER, TimeUnits.SECOND) // Correct Tuple with Length and Time
         );
         assertEquals(1.0f / 3.6f, result, DELTA);
     }
@@ -37,8 +35,8 @@ class SpeedUnitConverterTest {
     void testMilesPerHourToMetersPerSecond() {
         float result = speedConverter.convert(
                 1.0f,
-                new Tuple<>(LengthUnits.MILE, LengthUnits.METER),
-                new Tuple<>(TimeUnits.HOUR, TimeUnits.SECOND)
+                new Tuple<>(LengthUnits.MILE, TimeUnits.HOUR), // Correct Tuple with Length and Time
+                new Tuple<>(LengthUnits.METER, TimeUnits.SECOND) // Correct Tuple with Length and Time
         );
         assertEquals(0.44704f, result, DELTA);
     }
@@ -47,8 +45,8 @@ class SpeedUnitConverterTest {
     void testFeetPerSecondToKilometersPerHour() {
         float result = speedConverter.convert(
                 1.0f,
-                new Tuple<>(LengthUnits.FOOT, LengthUnits.KILOMETER),
-                new Tuple<>(TimeUnits.SECOND, TimeUnits.HOUR)
+                new Tuple<>(LengthUnits.FOOT, TimeUnits.SECOND), // Correct Tuple with Length and Time
+                new Tuple<>(LengthUnits.KILOMETER, TimeUnits.HOUR) // Correct Tuple with Length and Time
         );
         assertEquals(1.09728f, result, DELTA);
     }
@@ -57,8 +55,8 @@ class SpeedUnitConverterTest {
     void testIdentityConversion() {
         float result = speedConverter.convert(
                 1.0f,
-                new Tuple<>(LengthUnits.METER, LengthUnits.METER),
-                new Tuple<>(TimeUnits.SECOND, TimeUnits.SECOND)
+                new Tuple<>(LengthUnits.METER, TimeUnits.SECOND), // Correct Tuple with Length and Time
+                new Tuple<>(LengthUnits.METER, TimeUnits.SECOND) // Correct Tuple with Length and Time
         );
         assertEquals(1.0f, result, DELTA);
     }

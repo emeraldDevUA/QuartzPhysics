@@ -84,4 +84,10 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>github</id> <!-- This should match server-id -->
+            <url>https://maven.pkg.github.com/emeraldDevUA/QuartzPhysics.git</url>
+        </repository>
+    </distributionManagement>
 </project>

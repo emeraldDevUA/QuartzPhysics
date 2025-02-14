@@ -11,7 +11,6 @@ public abstract class InertiaPrimitive {
 
     protected Vector3f size;
     protected Vector3f position;  // position in design coordinates
-    protected Vector3f inertia;   // moment of inertia
     protected Vector3f offset;    // offset from center of gravity
     protected float mass;
 

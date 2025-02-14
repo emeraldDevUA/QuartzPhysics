@@ -16,11 +16,11 @@ public class SpeedUnitConverter
             = new TimeUnitConverter();
 
 
-    public float convert(float unit, Tuple<LengthUnits, LengthUnits> conversionType1,
-                         Tuple<TimeUnits,TimeUnits> conversionType2){
+    public float convert(float unit, Tuple<LengthUnits, TimeUnits> conversionType1,
+                         Tuple<LengthUnits,TimeUnits> conversionType2){
 
-        return unit * lengthUnitConverter.convert(1, conversionType1)
-                / timeUnitConverter.convert(1, conversionType2);
+        return unit * lengthUnitConverter.convert(1, new Tuple<>(conversionType1.a, conversionType2.a))
+                / timeUnitConverter.convert(1, new Tuple<>(conversionType1.b, conversionType2.b));
 
     }
 

@@ -8,6 +8,8 @@ import org.tourmaline.Collision.BoundingBox;
 import org.tourmaline.Collision.CollisionPrimitive;
 import org.tourmaline.RigidBody.RigidBody;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -109,8 +111,8 @@ public class PhysicsProcessor extends Thread{
                 }
             }
     }
-
-    void collideBodies(RigidBody b1, RigidBody b2){
+/**/
+    private void collideBodies(RigidBody b1, RigidBody b2){
         // body 1 - this
         Vector3f w1 = b1.getAngularVelocity().get(new Vector3f());
         Vector3f velocity1 = b1.getVelocity().get(new Vector3f());
@@ -183,6 +185,74 @@ public class PhysicsProcessor extends Thread{
 
     }
 
+
+    void collideBodiesExact(RigidBody b1, RigidBody b2) {
+        // Find collision points
+        List<Vector3f> contactPoints = findCollisionPoints(
+                (BoundingBox) b1.getCollisionPrimitive(),
+                (BoundingBox) b2.getCollisionPrimitive());
+
+        if (contactPoints.isEmpty()) return; // No collision detected
+
+        float restitution = 0.8f; // Coefficient of restitution (elasticity)
+
+        for (Vector3f contactPoint : contactPoints) {
+            // Relative positions of contact points
+            Vector3f r1 = new Vector3f(contactPoint).sub(b1.getPosition());
+            Vector3f r2 = new Vector3f(contactPoint).sub(b2.getPosition());
+
+            // Velocities at the contact points
+            Vector3f v1 = new Vector3f(b1.getVelocity()).add(new Vector3f(b1.getAngularVelocity()).cross(r1));
+            Vector3f v2 = new Vector3f(b2.getVelocity()).add(new Vector3f(b2.getAngularVelocity()).cross(r2));
+
+            // Relative velocity at contact
+            Vector3f relativeVelocity = new Vector3f(v1).sub(v2);
+
+            // Collision normal (from b1 to b2)
+            Vector3f normal = new Vector3f(b2.getPosition()).sub(b1.getPosition()).normalize();
+
+            // Relative velocity along the normal
+            float velAlongNormal = relativeVelocity.dot(normal);
+
+            // Skip if objects are separating
+            if (velAlongNormal > 0) continue;
+
+            // Compute impulse scalar
+            Matrix3f I1Inv = new Matrix3f(b1.getInertia()).invert();
+            Matrix3f I2Inv = new Matrix3f(b2.getInertia()).invert();
+
+            Vector3f r1CrossN = new Vector3f(r1).cross(normal);
+            Vector3f r2CrossN = new Vector3f(r2).cross(normal);
+
+            Vector3f I1r1CrossN = I1Inv.transform(r1CrossN);
+            Vector3f I2r2CrossN = I2Inv.transform(r2CrossN);
+
+            float impulseDenom = (1 / b1.getMass()) + (1 / b2.getMass()) +
+                    normal.dot(new Vector3f(I1r1CrossN).cross(r1)) +
+                    normal.dot(new Vector3f(I2r2CrossN).cross(r2));
+
+            float impulseMagnitude = -(1 + restitution) * velAlongNormal / impulseDenom;
+            Vector3f impulse = new Vector3f(normal).mul(impulseMagnitude);
+
+            // Apply impulse to linear velocity
+            b1.setVelocity(new Vector3f(b1.getVelocity()).add(new Vector3f(impulse).div(b1.getMass())));
+            b2.setVelocity(new Vector3f(b2.getVelocity()).sub(new Vector3f(impulse).div(b2.getMass())));
+
+            // Apply impulse to angular velocity
+            Vector3f w1Change = I1Inv.transform(new Vector3f(r1).cross(impulse));
+            Vector3f w2Change = I2Inv.transform(new Vector3f(r2).cross(impulse));
+
+            b1.setAngularVelocity(new Vector3f(b1.getAngularVelocity()).add(w1Change));
+            b2.setAngularVelocity(new Vector3f(b2.getAngularVelocity()).sub(w2Change));
+        }
+    }
+
+    List<Vector3f> findCollisionPoints(BoundingBox boxA, BoundingBox boxB) {
+
+        return null;
+
+    }
+
     private void adjustComponent(float condition, Vector3f w1, Vector3f w2, char component) {
         if (condition < 0) {
             applyAdjustment(w1, component);
@@ -220,6 +290,7 @@ public class PhysicsProcessor extends Thread{
     public void addRigidBody(RigidBody rigidBody) {
         rigidBodies.add(rigidBody);
     }
+
 }
 
 

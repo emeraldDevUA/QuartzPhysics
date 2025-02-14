@@ -5,6 +5,6 @@ import org.tourmaline.RigidBody.RigidBody;
 
 public interface ActiveElement {
 
-    Vector3f getForce(RigidBody rigidBody);
+    void getForce(RigidBody rigidBody);
 
 }

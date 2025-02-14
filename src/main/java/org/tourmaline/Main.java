@@ -8,17 +8,24 @@ import org.tourmaline.Collision.CollisionPrimitive;
 import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
 import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
+import org.tourmaline.PlanePhysics.Tuple;
 import org.tourmaline.Processing.PhysicsProcessor;
 import org.tourmaline.RigidBody.InertiaCalculator;
 import org.tourmaline.RigidBody.InertiaPrimitives.Cuboid;
 import org.tourmaline.RigidBody.InertiaPrimitives.InertiaPrimitive;
 import org.tourmaline.RigidBody.RigidBody;
+import org.tourmaline.Units.Length.LengthUnits;
+import org.tourmaline.Units.Speed.SpeedUnitConverter;
+import org.tourmaline.Units.Time.TimeUnits;
 
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
+
+import static org.tourmaline.Units.Length.LengthUnits.*;
+import static org.tourmaline.Units.Time.TimeUnits.*;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
@@ -31,6 +38,14 @@ public class Main {
     //        ArrayList<Wing> wings = new ArrayList<>();
             float wing_offset = -1.0f;
             float tail_offset = -6.6f;
+
+
+        SpeedUnitConverter speedUnitConverter = new SpeedUnitConverter();
+        float mps = speedUnitConverter.convert(1,
+                new Tuple<>(KILOMETER, HOUR),
+                new Tuple<>(METER, SECOND));
+
+        System.out.println(mps);
     //        Airfoil airfoil0012 = new Airfoil(arrayToList(Constants.NACA_0012));
     //
     //        Airfoil airfoil2412 = new Airfoil(arrayToList(Constants.NACA_2412));
@@ -79,10 +94,13 @@ public class Main {
                 new Vector3f(6.96f, 0.10f, 3.50f), plane_mass*1/4));
         list.add(new Cuboid(new Vector3f(wing_offset,0, -2.7f),
                 new Vector3f(6.96f, 0.10f, 3.50f), plane_mass*1/4));
+
         list.add(new Cuboid(new Vector3f(tail_offset,-0.1f, 0f),
                 new Vector3f(6.54f, 0.10f, 2.70f), plane_mass*1/10));
+
         list.add(new Cuboid(new Vector3f(tail_offset, 0.0f, 0.0f),
                 new Vector3f(5.31f, 3.10f, 0.10f), plane_mass*1/10));
+
         list.add(new Cuboid(new Vector3f(0f),
                 new Vector3f(8,2,2), plane_mass/2));
 

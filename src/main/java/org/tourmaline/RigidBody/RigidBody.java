@@ -45,7 +45,7 @@ public class RigidBody {
 
     private Vector3f surfaceNormal;
 
-    private static Airfoil staticFoil = null;
+    private Airfoil airFoil = null;
 
     public RigidBody(Matrix3f inertia, Vector3f position, float mass){
         this.mass = mass;
@@ -65,9 +65,8 @@ public class RigidBody {
         frictionQuotient = 0.4f;
         surfaceNormal = new Vector3f(0,1,0);
 
-        if(staticFoil == null){
-            staticFoil = new Airfoil(arrayToList(NACA_2412));
-        }
+
+        airFoil = new Airfoil(arrayToList(NACA_2412));
     }
 
 
@@ -92,7 +91,7 @@ public class RigidBody {
                 float angle = (float) Math.toDegrees(
                         Math.asin(reversedVelocity.dot(bodyNormal))
                 );
-                Tuple<Float, Float> tuple = staticFoil.sample(angle);
+                Tuple<Float, Float> tuple = airFoil.sample(angle);
                 // Compute air resistance force: 1/2 * p * v^2 * S * Cd * -v̂
 
                 reversedVelocity.mul(

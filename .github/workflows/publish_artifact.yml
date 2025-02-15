@@ -9,23 +9,43 @@
 name: Java CI with Maven
 
 on: push
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions: 
       contents: read
       packages: write
+
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'corretto'
-        options: '-J--enable-preview'
+        server-id: github  # Must match <id> in distributionManagement
+        settings-path: ${{ github.workspace }}
 
-    - name: Publlish Package
+    - name: Configure Maven settings
+      run: |
+        mkdir -p ~/.m2
+        cat > ~/.m2/settings.xml <<EOL
+        <settings>
+          <servers>
+            <server>
+              <id>github</id>
+              <username>${{ github.actor }}</username>
+              <password>${{ secrets.GH_TOKEN }}</password>
+            </server>
+          </servers>
+        </settings>
+        EOL
+
+    - name: Publish Package
       run: mvn --batch-mode deploy
       env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 

@@ -248,8 +248,9 @@ public class PhysicsProcessor extends Thread{
     }
 
     List<Vector3f> findCollisionPoints(BoundingBox boxA, BoundingBox boxB) {
-
-        return null;
+        List<Vector3f> collisionPoints = new ArrayList<>();
+        collisionPoints.add(new Vector3f(boxA.getPosition()).add(boxB.getPosition()).div(2));
+        return collisionPoints;
 
     }
 

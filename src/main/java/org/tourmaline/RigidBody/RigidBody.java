@@ -37,6 +37,7 @@ public class RigidBody {
 
     private boolean enableGravity = true;
     private boolean enableAirResistance = false;
+    private boolean enableLift = false;
     private boolean enableNormalReaction = false;
     private boolean enableFriction = false;
 
@@ -45,7 +46,7 @@ public class RigidBody {
 
     private Vector3f surfaceNormal;
 
-    private Airfoil airFoil = null;
+    private Airfoil airFoil;
 
     public RigidBody(Matrix3f inertia, Vector3f position, float mass){
         this.mass = mass;
@@ -100,6 +101,15 @@ public class RigidBody {
                 reversedVelocity.div(mass);
                 acceleration.add(reversedVelocity);
                 // use some airfoil to compute drag.
+                if(enableLift){
+                    Vector3f normal = new Vector3f(0,1,0);
+                    normal.mul(
+                            0.5f*po*squaredSpeed*surfaceArea*tuple.a
+                    );
+                    normal.div(mass);
+                    acceleration.add(normal);
+                }
+
 
             }
         }

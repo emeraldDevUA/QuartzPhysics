@@ -5,8 +5,11 @@ import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.io.Serializable;
+
 @Getter
-public class BoundingBox extends CollisionPrimitive{
+
+public class BoundingBox extends CollisionPrimitive implements Serializable {
     private Vector3f halfDims;
 
     public BoundingBox(final Vector3f position, final Vector3f halfDims,

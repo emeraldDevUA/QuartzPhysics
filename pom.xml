@@ -6,7 +6,7 @@
 
     <groupId>org.tourmaline</groupId>
     <artifactId>QuartzPhysics</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.1</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -85,10 +85,8 @@
     <distributionManagement>
         <repository>
             <id>github</id>
+            <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/emeraldDevUA/QuartzPhysics</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </distributionManagement>
 </project>

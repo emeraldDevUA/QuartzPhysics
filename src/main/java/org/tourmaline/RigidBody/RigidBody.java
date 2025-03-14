@@ -45,7 +45,7 @@ public class RigidBody {
     private float surfaceArea;
 
     private Vector3f surfaceNormal;
-
+    private DampingFunctions dampingFunctions;
     private Airfoil airFoil;
 
     public RigidBody(Matrix3f inertia, Vector3f position, float mass){
@@ -131,10 +131,10 @@ public class RigidBody {
             acceleration.add(normalReactionForce);
         }
 
-
+        synchronized (position){
         position.add(new Vector3f(velocity).mul(dt))
                 .add(new Vector3f(acceleration).mul(0.5f * dt * dt));
-
+}
         velocity.add(new Vector3f(acceleration).mul(dt)); // Assuming acceleration was updated
         if (velocity.length() > MAX_VELOCITY) {
             velocity.normalize().mul(MAX_VELOCITY);
@@ -155,6 +155,8 @@ public class RigidBody {
 //                = new Quaternionf(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0)
 //                .mul(dt / 2);
 //        orientation.add(deltaRotation);
+
+        angularVelocity.mul(dampingFunctions.getAngularVelocityDamping(dt));
 
 
         orientation.rotateLocalX(angularVelocity.x*dt/2);
@@ -293,7 +295,10 @@ public class RigidBody {
     }
 
 
-
+    public void setInertiaTensor(Matrix3f inertiaTensor){
+        this.inertia = inertiaTensor;
+        this.inverseInertia = new Matrix3f(inertiaTensor).invert();
+    }
 
     protected Vector3f transformDirection(Vector3f vector){
         return orientation.transform(new Vector3f(vector));

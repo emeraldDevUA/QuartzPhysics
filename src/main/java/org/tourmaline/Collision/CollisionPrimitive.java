@@ -16,7 +16,8 @@ public abstract class CollisionPrimitive {
     private Vector3f position;
     private Quaternionf quaternion;
     private Runnable collisionLambda;
-
+@Setter
+    private boolean isOn = true;
 
     public CollisionPrimitive(Vector3f position){
 

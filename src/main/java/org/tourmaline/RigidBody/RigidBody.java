@@ -75,7 +75,7 @@ public class RigidBody {
         acceleration = netForce.div(mass, new Vector3f());
 
         if(enableGravity){
-            acceleration.y -= 9.8f;
+            acceleration.y -= 9.8f ;
         }
 
         if(enableAirResistance){
@@ -156,8 +156,9 @@ public class RigidBody {
 //                .mul(dt / 2);
 //        orientation.add(deltaRotation);
 
-        angularVelocity.mul(dampingFunctions.getAngularVelocityDamping(dt));
-
+        if(dampingFunctions != null) {
+            angularVelocity.mul(dampingFunctions.getAngularVelocityDamping(dt));
+        }
 
         orientation.rotateLocalX(angularVelocity.x*dt/2);
         orientation.rotateLocalY(angularVelocity.y*dt/2);

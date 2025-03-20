@@ -46,46 +46,11 @@ public class Main {
                 new Tuple<>(METER, SECOND));
 
         System.out.println(mps);
-    //        Airfoil airfoil0012 = new Airfoil(arrayToList(Constants.NACA_0012));
-    //
-    //        Airfoil airfoil2412 = new Airfoil(arrayToList(Constants.NACA_2412));
-    //
-    //
-    //        wings.add(new Wing(new Vector3f(wing_offset,0, -2.7f), 6.96f, 2.50f,
-    //                airfoil2412, new Vector3f(0,1,0), 0.2f));
-    //
-    //        wings.add(new Wing(new Vector3f(wing_offset,0, 2.7f), 6.96f, 2.50f,
-    //                airfoil2412, new Vector3f(0,1,0), 0.2f));
-    //
-    //        wings.add(new Wing(new Vector3f(tail_offset,-0.1f, 0.0f), 6.54f, 2.70f,
-    //                airfoil0012, new Vector3f(0,1,0), 1f));
-    //
-    //        wings.add(new Wing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
-    //                airfoil0012, new Vector3f(0,0,1), 0.15f));
-    //
-    //        Plane plane = new Plane(inertia, new Vector3f(0,8000,0), 9000, jetEngine, wings);
-    //
-    //
+
             RigidBody rb1 = new RigidBody(inertia, new Vector3f(1000), 500);
             rb1.setEnableGravity(true);
             RigidBody rb2 = new RigidBody(inertia, new Vector3f(800), 300);
             rb2.setEnableGravity(true);
-    //
-    //
-    //        rb2.applyForce(new Vector3f(1000,0,0));
-    //
-    //
-    //        PhysicsProcessor physicsProcessor = new PhysicsProcessor(new ArrayList<>(), 0.001f);
-    //
-    //        physicsProcessor.addRigidBody(rb1);
-    //        physicsProcessor.addRigidBody(rb2);
-    //
-    //        physicsProcessor.start();
-    //
-    //        Thread.sleep(5000);
-    //
-    //        physicsProcessor.setRunning(false);
-
 
         float plane_mass = 10000f;
         List<InertiaPrimitive> list = new ArrayList<>();

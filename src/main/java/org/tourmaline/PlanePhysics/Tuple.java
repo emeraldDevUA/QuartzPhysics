@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import java.util.Objects;
 
-import static java.lang.StringTemplate.STR;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +19,7 @@ public class Tuple<A, B>{
 
     @Override
     public String toString(){
-        return STR."<\{a} \{b}>";
+        return "<"+a+">"+"<"+b+">";
     }
 
     @Override

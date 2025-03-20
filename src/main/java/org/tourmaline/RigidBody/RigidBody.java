@@ -156,8 +156,9 @@ public class RigidBody {
 //                .mul(dt / 2);
 //        orientation.add(deltaRotation);
 
-        angularVelocity.mul(dampingFunctions.getAngularVelocityDamping(dt));
-
+        if(dampingFunctions!= null) {
+            angularVelocity.mul(dampingFunctions.getAngularVelocityDamping(dt));
+        }
 
         orientation.rotateLocalX(angularVelocity.x*dt/2);
         orientation.rotateLocalY(angularVelocity.y*dt/2);
@@ -319,6 +320,18 @@ public class RigidBody {
 
     @Override
     public String toString() {
-        return STR."RigidBody{position=\{position}, velocity=\{velocity}, acceleration=\{acceleration}, angularVelocity=\{angularVelocity}, orientation=\{orientation}\{'}'}";
+        return "RigidBody{" +
+                "position=" + position +
+                ", velocity=" + velocity +
+                ", mass=" + mass +
+                ", acceleration=" + acceleration +
+                ", angularVelocity=" + angularVelocity +
+                ", enableGravity=" + enableGravity +
+                ", enableAirResistance=" + enableAirResistance +
+                ", enableLift=" + enableLift +
+                ", enableNormalReaction=" + enableNormalReaction +
+                ", enableFriction=" + enableFriction +
+                ", frictionQuotient=" + frictionQuotient +
+                '}';
     }
 }

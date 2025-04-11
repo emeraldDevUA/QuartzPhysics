@@ -75,7 +75,7 @@ public class RigidBody {
         acceleration = netForce.div(mass, new Vector3f());
 
         if(enableGravity){
-            acceleration.y -= 9.8f ;
+            acceleration.y -= 9.8f;
         }
 
         if(enableAirResistance){
@@ -134,15 +134,15 @@ public class RigidBody {
         synchronized (position){
         position.add(new Vector3f(velocity).mul(dt))
                 .add(new Vector3f(acceleration).mul(0.5f * dt * dt));
-}
+        }
         velocity.add(new Vector3f(acceleration).mul(dt)); // Assuming acceleration was updated
         if (velocity.length() > MAX_VELOCITY) {
             velocity.normalize().mul(MAX_VELOCITY);
         }
 
-        Vector3f torqueDifference = new Vector3f(netTorque)
-                .sub(new Vector3f(angularVelocity)
-                        .cross(inertia.transform(angularVelocity, new Vector3f())));
+        Vector3f transform = inertia.transform(new Vector3f(angularVelocity));
+        Vector3f torqueDifference = new Vector3f(netTorque).sub(
+                new Vector3f(angularVelocity).cross(transform));
 
         Vector3f finalBeta = inverseInertia.transform(torqueDifference).mul(dt);
         angularVelocity.add(finalBeta);
@@ -282,8 +282,11 @@ public class RigidBody {
                                 surfaceNormal.lengthSquared());
     }
 
-    public void applyTorque(Vector3f vector3f) {
-        netTorque.add(vector3f);
+    public void applyTorque(Vector3f force) {
+        netTorque.add(force) ;
+    }
+    public void applyTorque(Vector3f force, Vector3f point) {
+        netTorque.add(new Vector3f(point).cross(force)) ;
     }
     /**
      * Assumes you apply forces in body space, taking no account for rotations explicitly

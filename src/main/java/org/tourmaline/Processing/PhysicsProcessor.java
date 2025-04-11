@@ -117,6 +117,7 @@ public class PhysicsProcessor extends Thread{
                             executor.submit(temp2);
                         }
                         if(firstBody.getCollisionPrimitive().isOn() && secondBody.getCollisionPrimitive().isOn()) {
+
                             collideBodies(firstBody, secondBody);
 
                             firstBody.update(dt);
@@ -129,6 +130,7 @@ public class PhysicsProcessor extends Thread{
     }
 /**/
     private void collideBodies(RigidBody b1, RigidBody b2) {
+
         // Extract mass and inertia properties
         float m1 = b1.getMass();
         float m2 = b2.getMass();

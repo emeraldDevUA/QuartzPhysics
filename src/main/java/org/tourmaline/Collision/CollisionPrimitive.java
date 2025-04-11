@@ -16,9 +16,11 @@ public abstract class CollisionPrimitive {
     private Vector3f position;
     private Quaternionf quaternion;
     private Runnable collisionLambda;
-@Setter
+    @Setter
     private boolean isOn = true;
-
+    @Setter
+    @Getter
+    private boolean actAsGround = false;
     public CollisionPrimitive(Vector3f position){
 
         this.position = position;

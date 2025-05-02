@@ -131,10 +131,9 @@ public class RigidBody {
             acceleration.add(normalReactionForce);
         }
 
-        synchronized (position){
         position.add(new Vector3f(velocity).mul(dt))
                 .add(new Vector3f(acceleration).mul(0.5f * dt * dt));
-        }
+
         velocity.add(new Vector3f(acceleration).mul(dt)); // Assuming acceleration was updated
         if (velocity.length() > MAX_VELOCITY) {
             velocity.normalize().mul(MAX_VELOCITY);
@@ -170,101 +169,146 @@ public class RigidBody {
         netForce.set(0);
         netTorque.set(0);
     }
+    private Vector3f computeAngularAcceleration(Vector3f omega) {
+        Vector3f Iomega = inertia.transform(new Vector3f(omega));
+        Vector3f torqueTerm = new Vector3f(omega).cross(Iomega);
+        Vector3f accel = new Vector3f(netTorque).sub(torqueTerm);
+        return inverseInertia.transform(accel);
+    }
 
-    /*
-    public void update(float dt) {
-        // RK4 for Linear Dynamics
-        Vector3f k1v = new Vector3f(), k2v = new Vector3f(), k3v = new Vector3f(), k4v = new Vector3f();
-        Vector3f k1x = new Vector3f(), k2x = new Vector3f(), k3x = new Vector3f(), k4x = new Vector3f();
+     public void rk_update(float dt){
+        acceleration = netForce.div(mass, new Vector3f());
 
-        Vector3f acceleration = new Vector3f();
-        if (mass > 0) {
-            acceleration.set(netForce).div(mass);
-            if (enableGravity) {
-                acceleration.y -= 9.8f;
+        if(enableGravity){
+            acceleration.y -= 9.8f;
+        }
+
+        if(enableAirResistance){
+            // compute air resistance
+            float po = 1.225f;
+            float squaredSpeed = velocity.lengthSquared();
+            if(!(squaredSpeed <= EPSILON)) {
+
+                Vector3f reversedVelocity = new Vector3f(velocity)
+                        .negate().normalize();
+
+                Vector3f bodyNormal = new Vector3f(0,1,0);
+
+                float angle = (float) Math.toDegrees(
+                        Math.asin(reversedVelocity.dot(bodyNormal))
+                );
+                Tuple<Float, Float> tuple = airFoil.sample(angle);
+                // Compute air resistance force: 1/2 * p * v^2 * S * Cd * -v̂
+
+                reversedVelocity.mul(
+                        0.5f*po*squaredSpeed*surfaceArea*tuple.b
+                );
+                reversedVelocity.div(mass);
+                acceleration.add(reversedVelocity);
+                // use some airfoil to compute drag.
+                if(enableLift){
+                    Vector3f normal = new Vector3f(0,1,0);
+                    normal.mul(
+                            0.5f*po*squaredSpeed*surfaceArea*tuple.a
+                    );
+                    normal.div(mass);
+                    acceleration.add(normal);
+                }
+
+
             }
         }
 
-        // k1
-        k1v.set(acceleration).mul(dt);
-        k1x.set(velocity).mul(dt);
+        if(enableNormalReaction){
+            Vector3f normalReactionForce = computeNormalReaction();
+            normalReactionForce.div(mass);
+            if (enableFriction) {
+                float absVelocity = velocity.length();
+                if(!(absVelocity <= EPSILON)){
+                    Vector3f reversedVelocity = new Vector3f(velocity)
+                            .negate().normalize();
+                    Vector3f frictionForce =
+                            reversedVelocity.mul(frictionQuotient*normalReactionForce.length());
+                    acceleration.add(frictionForce);
+                }
 
-        // k2
-        Vector3f tempVelocity = new Vector3f(velocity).add(k1v.mul(0.5f));
-        Vector3f tempPosition = new Vector3f(position).add(k1x.mul(0.5f));
-        Vector3f tempAcceleration = new Vector3f(netForce).div(mass);
-        if (enableGravity) {
-            tempAcceleration.y -= 9.8f;
+            }
+            acceleration.add(normalReactionForce);
         }
-        k2v.set(tempAcceleration).mul(dt);
-        k2x.set(tempVelocity).mul(dt);
 
-        // k3
-        tempVelocity.set(velocity).add(k2v.mul(0.5f));
-        tempPosition.set(position).add(k2x.mul(0.5f));
-        tempAcceleration.set(netForce).div(mass);
-        if (enableGravity) {
-            tempAcceleration.y -= 9.8f;
+        Vector3f acceleration = new Vector3f(netForce); // divided by mass if needed
+
+// RK4 for velocity
+        Vector3f k1v = new Vector3f(acceleration);
+        Vector3f k2v = new Vector3f(acceleration);
+        Vector3f k3v = new Vector3f(acceleration);
+        Vector3f k4v = new Vector3f(acceleration);
+
+        Vector3f deltaV = new Vector3f(k1v).add(new Vector3f(k2v).mul(2)).add(new Vector3f(k3v).mul(2)).add(k4v).mul(dt / 6f);
+        velocity.add(deltaV);
+
+// Cap velocity
+        if (velocity.length() > MAX_VELOCITY) {
+            velocity.normalize().mul(MAX_VELOCITY);
         }
-        k3v.set(tempAcceleration).mul(dt);
-        k3x.set(tempVelocity).mul(dt);
 
-        // k4
-        tempVelocity.set(velocity).add(k3v);
-        tempPosition.set(position).add(k3x);
-        tempAcceleration.set(netForce).div(mass);
-        if (enableGravity) {
-            tempAcceleration.y -= 9.8f;
+// RK4 for position
+        Vector3f k1x = new Vector3f(velocity);
+        Vector3f k2x = new Vector3f(velocity).add(new Vector3f(deltaV).mul(0.5f));
+        Vector3f k3x = new Vector3f(velocity).add(new Vector3f(deltaV).mul(0.5f));
+        Vector3f k4x = new Vector3f(velocity).add(new Vector3f(deltaV));
+
+        Vector3f deltaX = new Vector3f(k1x).add(new Vector3f(k2x).mul(2)).add(new Vector3f(k3x).mul(2)).add(k4x).mul(dt / 6f);
+        position.add(deltaX);
+
+        Vector3f transform = inertia.transform(new Vector3f(angularVelocity));
+        Vector3f torqueDifference = new Vector3f(netTorque).sub(
+                new Vector3f(angularVelocity).cross(transform));
+
+        Vector3f finalBeta = inverseInertia.transform(torqueDifference).mul(dt);
+        angularVelocity.add(finalBeta);
+
+        Vector3f k1w = computeAngularAcceleration(angularVelocity);
+        Vector3f k2w = computeAngularAcceleration(new Vector3f(angularVelocity).add(new Vector3f(k1w).mul(dt / 2f)));
+        Vector3f k3w = computeAngularAcceleration(new Vector3f(angularVelocity).add(new Vector3f(k2w).mul(dt / 2f)));
+        Vector3f k4w = computeAngularAcceleration(new Vector3f(angularVelocity).add(new Vector3f(k3w).mul(dt)));
+
+        Vector3f deltaOmega = new Vector3f(k1w).add(new Vector3f(k2w).mul(2)).add(new Vector3f(k3w).mul(2)).add(k4w).mul(dt / 6f);
+        angularVelocity.add(deltaOmega);
+
+// Cap angular velocity
+        if (angularVelocity.length() > MAX_ANGULAR_VELOCITY) {
+            angularVelocity.normalize().mul(MAX_ANGULAR_VELOCITY);
         }
-        k4v.set(tempAcceleration).mul(dt);
-        k4x.set(tempVelocity).mul(dt);
 
-        // Update linear state
-        velocity.add(new Vector3f(k1v).add(k2v.mul(2)).add(k3v.mul(2)).add(k4v).mul(1 / 6f));
-        position.add(new Vector3f(k1x).add(k2x.mul(2)).add(k3x.mul(2)).add(k4x).mul(1 / 6f));
+// Damping
+        if (dampingFunctions != null) {
+            angularVelocity.mul(dampingFunctions.getAngularVelocityDamping(dt));
+        }
 
-        // RK4 for Angular Dynamics
-        Vector3f k1w = new Vector3f(), k2w = new Vector3f(), k3w = new Vector3f(), k4w = new Vector3f();
-        Quaternionf deltaRotation = new Quaternionf();
+        Quaternionf omegaQuat = new Quaternionf(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0f);
 
-        Vector3f torqueDifference = new Vector3f(netTorque)
-                .sub(angularVelocity.cross(inertia.transform(angularVelocity, new Vector3f())));
-        Vector3f angularAcceleration = inverseInertia.transform(torqueDifference);
+        Quaternionf q0 = new Quaternionf(orientation);
+        Quaternionf k1q = new Quaternionf(q0).mul(omegaQuat).mul(0.5f);
 
-        // k1
-        k1w.set(angularAcceleration).mul(dt);
+        Quaternionf q1 = new Quaternionf(q0).add(new Quaternionf(k1q).mul(dt / 2f));
+        Quaternionf k2q = new Quaternionf(q1).mul(omegaQuat).mul(0.5f);
 
-        // k2
-        tempVelocity.set(angularVelocity).add(k1w.mul(0.5f));
-        torqueDifference = new Vector3f(netTorque)
-                .sub(tempVelocity.cross(inertia.transform(tempVelocity, new Vector3f())));
-        angularAcceleration = inverseInertia.transform(torqueDifference);
-        k2w.set(angularAcceleration).mul(dt);
+        Quaternionf q2 = new Quaternionf(q0).add(new Quaternionf(k2q).mul(dt / 2f));
+        Quaternionf k3q = new Quaternionf(q2).mul(omegaQuat).mul(0.5f);
 
-        // k3
-        tempVelocity.set(angularVelocity).add(k2w.mul(0.5f));
-        torqueDifference = new Vector3f(netTorque)
-                .sub(tempVelocity.cross(inertia.transform(tempVelocity, new Vector3f())));
-        angularAcceleration = inverseInertia.transform(torqueDifference);
-        k3w.set(angularAcceleration).mul(dt);
+        Quaternionf q3 = new Quaternionf(q0).add(new Quaternionf(k3q).mul(dt));
+        Quaternionf k4q = new Quaternionf(q3).mul(omegaQuat).mul(0.5f);
 
-        // k4
-        tempVelocity.set(angularVelocity).add(k3w);
-        torqueDifference = new Vector3f(netTorque)
-                .sub(tempVelocity.cross(inertia.transform(tempVelocity, new Vector3f())));
-        angularAcceleration = inverseInertia.transform(torqueDifference);
-        k4w.set(angularAcceleration).mul(dt);
+        Quaternionf deltaQ = new Quaternionf(k1q)
+                .add(new Quaternionf(k2q).mul(2f))
+                .add(new Quaternionf(k3q).mul(2f))
+                .add(k4q)
+                .mul(dt / 6f);
 
-        // Update angular state
-        angularVelocity.add(new Vector3f(k1w).add(k2w.mul(2)).add(k3w.mul(2)).add(k4w).mul(1 / 6f));
-        deltaRotation.set(angularVelocity.x, angularVelocity.y, angularVelocity.z, 0).mul(dt / 2);
-        orientation.add(deltaRotation);
+        orientation.add(deltaQ);
         orientation.normalize();
-
-        // Reset forces and torques for the next iteration
-        netForce.set(0);
-        netTorque.set(0);
-    }
+    }    /*
 */
 
 
